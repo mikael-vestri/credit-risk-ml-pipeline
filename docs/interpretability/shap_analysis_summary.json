@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-01-14T17:59:41.627842",
+  "background_sample_size": 500,
+  "explanation_sample_size": 200,
+  "models_analyzed": [
+    "logistic_regression",
+    "random_forest",
+    "xgboost"
+  ],
+  "top_features_by_model": {
+    "logistic_regression": [
+      {
+        "feature": "last_fico_range_high",
+        "mean_abs_shap": 1.2407517674740274
+      },
+      {
+        "feature": "last_fico_range_low",
+        "mean_abs_shap": 0.33314511844170047
+      },
+      {
+        "feature": "int_rate",
+        "mean_abs_shap": 0.19285447552042215
+      },
+      {
+        "feature": "dti",
+        "mean_abs_shap": 0.15014204620936814
+      },
+      {
+        "feature": "open_rv_24m",
+        "mean_abs_shap": 0.12110710228170529
+      },
+      {
+        "feature": "installment",
+        "mean_abs_shap": 0.11219150720815868
+      },
+      {
+        "feature": "funded_amnt",
+        "mean_abs_shap": 0.10589010283432841
+      },
+      {
+        "feature": "loan_amnt",
+        "mean_abs_shap": 0.10404045682871992
+      },
+      {
+        "feature": "installment_to_income_ratio",
+        "mean_abs_shap": 0.08917509442458624
+      },
+      {
+        "feature": "open_acc_6m",
+        "mean_abs_shap": 0.08391526240510416
+      }
+    ],
+    "random_forest": [
+      {
+        "feature": "last_fico_range_high",
+        "mean_abs_shap": 0.21152566061224715
+      },
+      {
+        "feature": "last_fico_range_low",
+        "mean_abs_shap": 0.18800787434007796
+      },
+      {
+        "feature": "dti",
+        "mean_abs_shap": 0.01243194530642286
+      },
+      {
+        "feature": "installment_to_income_ratio",
+        "mean_abs_shap": 0.009473131032285248
+      },
+      {
+        "feature": "int_rate",
+        "mean_abs_shap": 0.006215685390230798
+      },
+      {
+        "feature": "issue_year",
+        "mean_abs_shap": 0.0043102679189768265
+      },
+      {
+        "feature": "funded_amnt_inv",
+        "mean_abs_shap": 0.002617893623065692
+      },
+      {
+        "feature": "installment",
+        "mean_abs_shap": 0.0025977634987197425
+      },
+      {
+        "feature": "mths_since_last_major_derog",
+        "mean_abs_shap": 0.001739456138248289
+      },
+      {
+        "feature": "num_bc_tl",
+        "mean_abs_shap": 0.0017324386780698936
+      }
+    ],
+    "xgboost": [
+      {
+        "feature": "last_fico_range_high",
+        "mean_abs_shap": 2.8507256507873535
+      },
+      {
+        "feature": "last_fico_range_low",
+        "mean_abs_shap": 0.18693938851356506
+      },
+      {
+        "feature": "dti",
+        "mean_abs_shap": 0.16997352242469788
+      },
+      {
+        "feature": "int_rate",
+        "mean_abs_shap": 0.14589181542396545
+      },
+      {
+        "feature": "installment_to_income_ratio",
+        "mean_abs_shap": 0.10802105814218521
+      },
+      {
+        "feature": "loan_amnt",
+        "mean_abs_shap": 0.08195796608924866
+      },
+      {
+        "feature": "issue_year",
+        "mean_abs_shap": 0.07800564169883728
+      },
+      {
+        "feature": "total_bal_il",
+        "mean_abs_shap": 0.04907289147377014
+      },
+      {
+        "feature": "issue_month",
+        "mean_abs_shap": 0.04614701122045517
+      },
+      {
+        "feature": "annual_inc",
+        "mean_abs_shap": 0.03835355490446091
+      }
+    ]
+  }
+}

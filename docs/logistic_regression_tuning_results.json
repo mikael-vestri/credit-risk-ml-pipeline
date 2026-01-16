@@ -1,0 +1,81 @@
+{
+  "best_params": {
+    "classifier__l1_ratio": 0,
+    "classifier__C": 0.01
+  },
+  "best_score": 0.9319759439578172,
+  "scoring_metric": "roc_auc",
+  "cv_folds": 5,
+  "method": "random",
+  "n_iterations": 20,
+  "cv_results": {
+    "mean_test_score": [
+      0.9319759439578172,
+      NaN,
+      NaN,
+      0.9302256727133514,
+      NaN,
+      NaN,
+      0.9284728925286163,
+      NaN,
+      NaN,
+      0.9281773205024152,
+      NaN,
+      NaN,
+      0.9280861361569122,
+      NaN,
+      NaN
+    ],
+    "std_test_score": [
+      0.016428977677544046,
+      NaN,
+      NaN,
+      0.0168144370320499,
+      NaN,
+      NaN,
+      0.016918624246899844,
+      NaN,
+      NaN,
+      0.017112383040689537,
+      NaN,
+      NaN,
+      0.017113322580267147,
+      NaN,
+      NaN
+    ],
+    "mean_train_score": [
+      0.9417513205027053,
+      NaN,
+      NaN,
+      0.9438479802417458,
+      NaN,
+      NaN,
+      0.9441608484116081,
+      NaN,
+      NaN,
+      0.9442739303985512,
+      NaN,
+      NaN,
+      0.9442948476623501,
+      NaN,
+      NaN
+    ],
+    "params": [
+      "{'classifier__l1_ratio': 0, 'classifier__C': 0.01}",
+      "{'classifier__l1_ratio': 0.5, 'classifier__C': 0.01}",
+      "{'classifier__l1_ratio': 1.0, 'classifier__C': 0.01}",
+      "{'classifier__l1_ratio': 0, 'classifier__C': 0.1}",
+      "{'classifier__l1_ratio': 0.5, 'classifier__C': 0.1}",
+      "{'classifier__l1_ratio': 1.0, 'classifier__C': 0.1}",
+      "{'classifier__l1_ratio': 0, 'classifier__C': 1.0}",
+      "{'classifier__l1_ratio': 0.5, 'classifier__C': 1.0}",
+      "{'classifier__l1_ratio': 1.0, 'classifier__C': 1.0}",
+      "{'classifier__l1_ratio': 0, 'classifier__C': 10.0}",
+      "{'classifier__l1_ratio': 0.5, 'classifier__C': 10.0}",
+      "{'classifier__l1_ratio': 1.0, 'classifier__C': 10.0}",
+      "{'classifier__l1_ratio': 0, 'classifier__C': 100.0}",
+      "{'classifier__l1_ratio': 0.5, 'classifier__C': 100.0}",
+      "{'classifier__l1_ratio': 1.0, 'classifier__C': 100.0}"
+    ]
+  }
+}
