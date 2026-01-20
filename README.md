@@ -117,7 +117,7 @@ The primary metric will be determined based on business priorities. Candidates i
 
 ## Project Status
 
-**Current Phase**: Step 10 - Model Interpretability ✅
+**Current Phase**: Step 11 - Production Deployment ✅
 
 **Completed Steps**: 
 - Step 0: Project Definition & Alignment ✅
@@ -131,9 +131,10 @@ The primary metric will be determined based on business priorities. Candidates i
 - Step 8: Hyperparameter Tuning ✅
 - Step 9: Model Evaluation ✅
 - Step 10: Model Interpretability (SHAP analysis) ✅
+- Step 11: Production Deployment (FastAPI REST API) ✅
 
 **Next Steps**: 
-- Step 11: Production Deployment
+- Step 12: Monitoring & Model Drift Detection (Future)
 
 ---
 
@@ -142,8 +143,9 @@ The primary metric will be determined based on business priorities. Candidates i
 - **Python**: 3.10+
 - **Core ML**: scikit-learn
 - **Advanced Models**: XGBoost
+- **API Framework**: FastAPI
 - **Testing**: pytest
-- **Interpretability**: SHAP (optional but desired)
+- **Interpretability**: SHAP
 - **Environment**: venv
 
 ---
@@ -159,6 +161,7 @@ credit-risk-ml-pipeline/
 ├── notebooks/
 │   └── 01_eda.ipynb      # Exploratory Data Analysis (to be created)
 ├── src/
+│   ├── api/              # API for model serving (FastAPI)
 │   ├── config/           # Configuration files and constants
 │   ├── data/             # Data ingestion and processing
 │   ├── features/         # Feature engineering
@@ -172,6 +175,59 @@ credit-risk-ml-pipeline/
 ├── requirements.txt      # Python dependencies
 └── .gitignore           # Git ignore rules
 ```
+
+---
+
+---
+
+## Quick Start
+
+### Running the API
+
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Start the API server:**
+   ```bash
+   python scripts/run_api.py
+   ```
+
+3. **Access the API:**
+   - API Base URL: http://localhost:8000
+   - Interactive Documentation: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/health
+
+4. **Make a prediction:**
+   ```python
+   import requests
+   
+   response = requests.post(
+       "http://localhost:8000/predict",
+       json={
+           "loan_amnt": 10000,
+           "funded_amnt": 10000,
+           "funded_amnt_inv": 10000,
+           "int_rate": 10.5,
+           "installment": 300.0,
+           "annual_inc": 50000,
+           "dti": 15.5,
+           "delinq_2yrs": 0,
+           "fico_range_low": 700,
+           "fico_range_high": 704,
+           "inq_last_6mths": 1,
+           "open_acc": 10,
+           "pub_rec": 0,
+           "revol_bal": 5000,
+           "revol_util": 30.0,
+           "total_acc": 20
+       }
+   )
+   print(response.json())
+   ```
+
+For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md).
 
 ---
 
