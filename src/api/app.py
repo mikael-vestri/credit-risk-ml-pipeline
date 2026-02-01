@@ -10,8 +10,8 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, Field, validator
 
 # Add project root to path
