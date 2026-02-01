@@ -4,13 +4,15 @@ FastAPI application for credit risk prediction API.
 This module provides a REST API for serving credit risk predictions.
 """
 
-from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, status, Request
+from fastapi.responses import JSONResponse, Response
+from fastapi.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 import logging
 from pathlib import Path
 import sys
+import time
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -22,6 +24,12 @@ from api.serving import (
     prepare_input_features,
     predict_default_probability,
     get_model_info
+)
+from api.monitoring import (
+    request_metrics,
+    drift_detector,
+    get_metrics_response,
+    update_model_loaded_status
 )
 
 # Configure logging
@@ -37,6 +45,33 @@ app = FastAPI(
     description="API for predicting loan default probability using ML models",
     version="1.0.0"
 )
+
+
+# Middleware for request tracking
+class MetricsMiddleware(BaseHTTPMiddleware):
+    """Middleware to track request metrics."""
+    
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        method = request.method
+        path = request.url.path
+        
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+            duration = time.time() - start_time
+            
+            request_metrics.record_request(method, path, status_code, duration)
+            
+            return response
+        except Exception as e:
+            status_code = 500
+            duration = time.time() - start_time
+            request_metrics.record_request(method, path, status_code, duration)
+            raise
+
+
+app.add_middleware(MetricsMiddleware)
 
 # Global variables for model and metadata
 MODEL = None
@@ -212,8 +247,12 @@ async def load_model():
         logger.info(f"Model loaded successfully: {MODEL_INFO['model_name']}")
         logger.info(f"Model expects {MODEL_INFO['feature_count']} features")
         
+        # Update monitoring
+        update_model_loaded_status(True)
+        
     except Exception as e:
         logger.error(f"Failed to load model: {str(e)}")
+        update_model_loaded_status(False)
         raise
 
 
@@ -249,6 +288,30 @@ async def get_model_information():
         )
     
     return MODEL_INFO
+
+
+@app.get("/metrics", tags=["Monitoring"])
+async def metrics():
+    """
+    Prometheus metrics endpoint.
+    
+    Returns metrics in Prometheus format for scraping.
+    """
+    metrics_data, content_type = get_metrics_response()
+    return Response(content=metrics_data, media_type=content_type)
+
+
+@app.get("/stats", tags=["Monitoring"])
+async def get_stats():
+    """
+    Get API statistics (request counts, error rates, latency).
+    
+    Returns JSON with current API statistics.
+    """
+    return {
+        "request_stats": request_metrics.get_stats(),
+        "timestamp": time.time()
+    }
 
 
 @app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
@@ -298,8 +361,19 @@ async def predict(application: LoanApplication):
         feature_names = MODEL_METADATA['feature_names']
         features_df = prepare_input_features(input_dict, feature_names)
         
+        # Check for data drift (optional, logs warnings)
+        drift_result = drift_detector.check_drift(features_df)
+        if drift_result.get("drift_detected"):
+            logger.warning(f"Data drift detected: {drift_result}")
+        
         # Make prediction
         result = predict_default_probability(MODEL, features_df, return_proba=True)
+        
+        # Record prediction metrics
+        request_metrics.record_prediction(
+            result["prediction"],
+            result["default_probability"]
+        )
         
         return PredictionResponse(**result)
         

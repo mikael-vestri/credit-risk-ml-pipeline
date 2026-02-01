@@ -1,0 +1,53 @@
+"""
+Test that all modules can be imported without errors.
+"""
+
+import sys
+from pathlib import Path
+
+# Add src to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root / "src"))
+
+
+def test_api_imports():
+    """Test that API modules can be imported."""
+    from api import app, serving
+    assert app is not None
+    assert serving is not None
+
+
+def test_data_imports():
+    """Test that data modules can be imported."""
+    from data import (
+        ingestion,
+        cleaning,
+        pipeline,
+        sampling,
+        validation,
+    )
+    assert ingestion is not None
+    assert cleaning is not None
+    assert pipeline is not None
+
+
+def test_models_imports():
+    """Test that model modules can be imported."""
+    from models import trainers, tuning, evaluation
+    assert trainers is not None
+    assert tuning is not None
+    assert evaluation is not None
+
+
+def test_features_imports():
+    """Test that feature modules can be imported."""
+    from features import builders, pipeline
+    assert builders is not None
+    assert pipeline is not None
+
+
+def test_config_imports():
+    """Test that config modules can be imported."""
+    from config import dataset_config, feature_config
+    assert dataset_config is not None
+    assert feature_config is not None
