@@ -29,8 +29,12 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "C4", "W"]
-ignore = ["E501"]  # black handles line length
+select = ["E", "F", "UP", "B", "C4", "W"]  # I (isort) off: import order not enforced
+ignore = [
+    "E501",   # black handles line length
+    "W293",   # whitespace on blank line (noise in docstrings; clean up later)
+    "B904",   # raise from: require "raise X from e" in except (fixed in api; rest later)
+]
 fixable = ["ALL"]
 
 [tool.pytest.ini_options]

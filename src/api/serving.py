@@ -4,12 +4,12 @@ Model serving module.
 This module provides functions to load models and make predictions.
 """
 
-import pickle
 import logging
+import pickle
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 import pandas as pd
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -17,72 +17,69 @@ logger = logging.getLogger(__name__)
 def load_model_from_disk(model_path: Path) -> Any:
     """
     Load a trained model from disk.
-    
+
     Parameters
     ----------
     model_path : Path
         Path to the saved model (.pkl file)
-        
+
     Returns
     -------
     Loaded model (Pipeline or XGBClassifier)
     """
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
-    
+
     logger.info(f"Loading model from: {model_path}")
-    with open(model_path, 'rb') as f:
+    with open(model_path, "rb") as f:
         model = pickle.load(f)
-    
+
     logger.info(f"Model loaded successfully: {type(model).__name__}")
     return model
 
 
-def load_model_metadata(metadata_path: Path) -> Dict[str, Any]:
+def load_model_metadata(metadata_path: Path) -> dict[str, Any]:
     """
     Load model metadata.
-    
+
     Parameters
     ----------
     metadata_path : Path
         Path to the metadata JSON file
-        
+
     Returns
     -------
     Dictionary with model metadata
     """
     import json
-    
+
     if not metadata_path.exists():
         raise FileNotFoundError(f"Metadata file not found: {metadata_path}")
-    
-    with open(metadata_path, 'r') as f:
+
+    with open(metadata_path) as f:
         metadata = json.load(f)
-    
+
     return metadata
 
 
-def prepare_input_features(
-    input_data: Dict[str, Any],
-    feature_names: List[str]
-) -> pd.DataFrame:
+def prepare_input_features(input_data: dict[str, Any], feature_names: list[str]) -> pd.DataFrame:
     """
     Prepare input features from a dictionary to a DataFrame with correct feature order.
-    
+
     Parameters
     ----------
     input_data : Dict[str, Any]
         Dictionary with feature names as keys and values
     feature_names : List[str]
         List of expected feature names in the correct order
-        
+
     Returns
     -------
     pd.DataFrame with features in the correct order
     """
     # Create DataFrame from input
     df = pd.DataFrame([input_data])
-    
+
     # Check for missing features
     missing_features = set(feature_names) - set(df.columns)
     if missing_features:
@@ -90,35 +87,33 @@ def prepare_input_features(
             f"Missing required features: {missing_features}. "
             f"Expected {len(feature_names)} features, got {len(df.columns)}"
         )
-    
+
     # Check for extra features (warn but don't fail)
     extra_features = set(df.columns) - set(feature_names)
     if extra_features:
         logger.warning(f"Extra features provided (will be ignored): {extra_features}")
-    
+
     # Select and order features correctly
     df_features = df[feature_names].copy()
-    
+
     # Ensure numeric types
     for col in df_features.columns:
-        df_features[col] = pd.to_numeric(df_features[col], errors='coerce')
-    
+        df_features[col] = pd.to_numeric(df_features[col], errors="coerce")
+
     # Check for NaN values
     nan_cols = df_features.columns[df_features.isna().any()].tolist()
     if nan_cols:
         raise ValueError(f"NaN values found in features: {nan_cols}")
-    
+
     return df_features
 
 
 def predict_default_probability(
-    model: Any,
-    features: pd.DataFrame,
-    return_proba: bool = True
-) -> Dict[str, Any]:
+    model: Any, features: pd.DataFrame, return_proba: bool = True
+) -> dict[str, Any]:
     """
     Make a prediction using the loaded model.
-    
+
     Parameters
     ----------
     model : Any
@@ -127,7 +122,7 @@ def predict_default_probability(
         Input features DataFrame
     return_proba : bool
         If True, return probability; if False, return binary prediction
-        
+
     Returns
     -------
     Dictionary with prediction results
@@ -142,29 +137,29 @@ def predict_default_probability(
         else:
             prediction = int(model.predict(features)[0])
             default_probability = None
-        
+
         result = {
             "prediction": prediction,
             "default_probability": default_probability,
-            "status": "success"
+            "status": "success",
         }
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Prediction error: {str(e)}")
-        raise RuntimeError(f"Failed to make prediction: {str(e)}")
+        raise RuntimeError(f"Failed to make prediction: {str(e)}") from e
 
 
-def get_model_info(metadata: Dict[str, Any]) -> Dict[str, Any]:
+def get_model_info(metadata: dict[str, Any]) -> dict[str, Any]:
     """
     Extract model information from metadata.
-    
+
     Parameters
     ----------
     metadata : Dict[str, Any]
         Model metadata dictionary
-        
+
     Returns
     -------
     Dictionary with model information
@@ -173,5 +168,5 @@ def get_model_info(metadata: Dict[str, Any]) -> Dict[str, Any]:
         "model_name": metadata.get("model_name", "unknown"),
         "feature_count": metadata.get("feature_count", 0),
         "timestamp": metadata.get("timestamp", "unknown"),
-        "feature_names": metadata.get("feature_names", [])
+        "feature_names": metadata.get("feature_names", []),
     }
