@@ -50,8 +50,8 @@ data/processed/*
 data/external/*
 !data/external/.gitkeep
 
-# Model artifacts
-models/
+# Model artifacts (root-level only; src/models/ is the Python package, must be tracked)
+/models/
 *.pkl
 *.joblib
 *.h5

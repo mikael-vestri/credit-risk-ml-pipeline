@@ -1,5 +1,3 @@
 """
 Utility functions and helpers.
 """
-
-
