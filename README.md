@@ -133,7 +133,7 @@ The primary metric will be determined based on business priorities. Candidates i
 
 ## Project Status
 
-**Current Phase**: Step 12 - Communication & Portfolio Polish ✅
+**Current Phase**: Step 13 - Production Hardening ✅
 
 **Completed Steps**: 
 - Step 0: Project Definition & Alignment ✅
@@ -149,9 +149,7 @@ The primary metric will be determined based on business priorities. Candidates i
 - Step 10: Model Interpretability (SHAP analysis) ✅
 - Step 11: Production Deployment (FastAPI REST API) ✅
 - Step 12: Communication & Portfolio Polish ✅
-
-**Next Steps**: 
-- Step 13: Conclusion & Next Steps
+- Step 13: Production Hardening (CI/CD, Monitoring, Versioning, Retraining) ✅
 
 ---
 
@@ -264,10 +262,20 @@ The most important features for predicting loan default (based on SHAP analysis)
 │    - Input validation (Pydantic models)                         │
 │    - Automatic feature engineering                              │
 │    - Health check & model info endpoints                        │
+│    - Monitoring endpoints (/metrics, /stats)                   │
+│    - Data drift detection                                       │
 │  • Model Serving (src/api/serving.py)                           │
 │    - Model loading & caching                                    │
 │    - Feature preparation                                        │
 │    - Prediction logic                                           │
+│  • Monitoring (src/api/monitoring.py)                           │
+│    - Prometheus metrics                                         │
+│    - Request tracking                                           │
+│    - Data drift detection                                       │
+│  • Artifact Registry (src/registry/)                           │
+│    - Model versioning                                           │
+│    - Training run tracking                                      │
+│    - Model promotion workflow                                   │
 └────────┬────────────────────────────────────────────────────────┘
          │
          ▼
@@ -289,6 +297,9 @@ The most important features for predicting loan default (based on SHAP analysis)
 8. **Model Interpretability**: SHAP analysis for explainability
 9. **Model Serialization**: Save best models for production
 10. **API Deployment**: FastAPI server for real-time predictions
+11. **Model Registry**: Register models with versioning and metadata
+12. **Monitoring**: Track requests, metrics, and data drift
+13. **Retraining**: Automated pipeline for model updates
 
 ### Key Design Decisions
 
@@ -297,6 +308,10 @@ The most important features for predicting loan default (based on SHAP analysis)
 - **Pipeline Architecture**: Scikit-learn pipelines ensure consistent preprocessing in production
 - **Interpretability**: SHAP analysis provides model explainability for regulatory compliance
 - **Production-Ready**: FastAPI with input validation and automatic feature engineering
+- **CI/CD**: Automated testing and linting via GitHub Actions
+- **Monitoring**: Prometheus metrics, request tracking, and data drift detection
+- **Model Versioning**: Artifact registry for tracking and promoting models
+- **Automated Retraining**: Scripts for retraining and model promotion workflows
 
 ---
 
@@ -306,7 +321,10 @@ The most important features for predicting loan default (based on SHAP analysis)
 - **Core ML**: scikit-learn
 - **Advanced Models**: XGBoost
 - **API Framework**: FastAPI
-- **Testing**: pytest
+- **Testing**: pytest, pytest-cov
+- **Code Quality**: ruff, black, pre-commit
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Prometheus (prometheus-client)
 - **Interpretability**: SHAP
 - **Environment**: venv
 
@@ -394,6 +412,10 @@ For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMEN
 ---
 
 ## Documentation
+
+### Production Documentation
+- **[Production Checklist](docs/PRODUCTION_CHECKLIST.md)**: Pre-deployment checklist, deployment steps, and post-deployment validation
+- **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)**: Troubleshooting guide, monitoring procedures, and emergency protocols
 
 ### API Documentation
 - **[API Documentation](docs/API_DOCUMENTATION.md)**: Complete API reference with endpoints, request/response formats, and examples

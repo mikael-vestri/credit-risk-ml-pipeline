@@ -53,10 +53,8 @@ DATE_COLUMN = "issue_d"  # Loan issue date
 # Temporal split configuration
 # Will be set based on data analysis
 TRAIN_SPLIT_DATE = None  # To be determined
-TEST_SPLIT_DATE = None   # To be determined
+TEST_SPLIT_DATE = None  # To be determined
 
 # Rejected loans indicator
 # Column that indicates if loan was rejected (if available)
 REJECTED_LOAN_INDICATOR = None  # To be identified from dataset
-
-
