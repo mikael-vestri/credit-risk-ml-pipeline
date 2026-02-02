@@ -51,7 +51,7 @@ jobs:
       
       - name: Run tests
         env:
-          PYTHONPATH: src
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
       
