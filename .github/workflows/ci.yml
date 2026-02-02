@@ -50,6 +50,8 @@ jobs:
           pip install pytest pytest-cov httpx
       
       - name: Run tests
+        env:
+          PYTHONPATH: src
         run: |
           pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
       
