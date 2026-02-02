@@ -33,6 +33,10 @@ def test_data_imports():
 
 def test_models_imports():
     """Test that model modules can be imported."""
+    # Ensure src is first on path (CI can have other 'models' in path)
+    root = Path(__file__).resolve().parent.parent
+    src = (root / "src").resolve()
+    sys.path.insert(0, str(src))
     from models import evaluation, trainers, tuning
 
     assert trainers is not None
