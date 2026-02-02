@@ -32,19 +32,28 @@ def test_data_imports():
 
 
 def test_models_imports():
-    """Test that model modules can be imported (restrict path so only src provides 'models')."""
+    """Test that model modules can be imported (load by path to avoid 'models' name shadowing)."""
+    import importlib.util
+
     root = Path(__file__).resolve().parent.parent
-    src = str((root / "src").resolve())
-    # Ensure only our src can provide 'models' (avoid cwd or other 'models' shadowing)
-    old_path = sys.path.copy()
-    sys.path = [src] + [p for p in old_path if p not in ("", ".")]
-    try:
-        from models import evaluation, trainers, tuning
-        assert trainers is not None
-        assert tuning is not None
-        assert evaluation is not None
-    finally:
-        sys.path = old_path
+    src = root / "src"
+    models_init = src / "models" / "__init__.py"
+    assert models_init.exists(), f"Expected {models_init} to exist"
+
+    # Load models package from path and register in sys.modules so it's findable
+    spec = importlib.util.spec_from_file_location(
+        "models",
+        models_init,
+        submodule_search_locations=[str(src / "models")],
+    )
+    models_pkg = importlib.util.module_from_spec(spec)
+    sys.modules["models"] = models_pkg
+    spec.loader.exec_module(models_pkg)
+
+    # __init__.py imports from .trainers, .tuning, .evaluation; verify they're loaded
+    assert hasattr(models_pkg, "train_logistic_regression")
+    assert hasattr(models_pkg, "tune_all_models")
+    assert hasattr(models_pkg, "evaluate_all_models")
 
 
 def test_features_imports():
