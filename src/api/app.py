@@ -5,6 +5,7 @@ This module provides a REST API for serving credit risk predictions.
 """
 
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -236,21 +237,42 @@ class HealthResponse(BaseModel):
 # Startup event: Load model
 @app.on_event("startup")
 async def load_model():
-    """Load the model on application startup."""
+    """Load the champion model on application startup.
+
+    Serving loads a fixed alias (e.g. production.pkl), not a model-specific file.
+    The training pipeline sets that alias to the best model (symlink); we do not
+    hardcode algorithm names here so that when XGBoost wins training, the API
+    automatically serves XGBoost without code or config changes.
+
+    Path resolution:
+    1. MODEL_PATH env var (e.g. /app/models/production.pkl in Docker)
+    2. MODEL_METADATA_PATH env var (optional; if unset, derived as <stem>_metadata.json)
+    3. Default: project_root/models/production.pkl (local development)
+    """
     global MODEL, MODEL_METADATA, MODEL_INFO
 
     try:
-        models_dir = project_root / "models"
+        env_model = os.environ.get("MODEL_PATH")
+        env_metadata = os.environ.get("MODEL_METADATA_PATH")
 
-        # Load best model (Random Forest based on evaluation)
-        model_name = "random_forest_tuned"
-        model_path = models_dir / f"{model_name}.pkl"
-        metadata_path = models_dir / f"{model_name}_metadata.json"
+        if env_model:
+            model_path = Path(env_model)
+            if env_metadata:
+                metadata_path = Path(env_metadata)
+            else:
+                # Derive metadata path: production.pkl -> production_metadata.json (alias; symlink set by training)
+                stem = model_path.stem
+                metadata_path = model_path.parent / f"{stem}_metadata.json"
+        else:
+            # Default: fixed alias so serving never depends on a specific algorithm name
+            models_dir = project_root / "models"
+            model_path = models_dir / "production.pkl"
+            metadata_path = models_dir / "production_metadata.json"
 
         if not model_path.exists():
             raise FileNotFoundError(f"Model file not found: {model_path}")
 
-        logger.info(f"Loading model: {model_name}")
+        logger.info(f"Loading model: {model_path}")
         MODEL = load_model_from_disk(model_path)
         MODEL_METADATA = load_model_metadata(metadata_path)
         MODEL_INFO = get_model_info(MODEL_METADATA)

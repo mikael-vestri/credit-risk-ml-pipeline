@@ -1,0 +1,41 @@
+# =============================================================================
+# Local dev / demo: API (long-running) + optional one-off training job.
+# - api: FastAPI on port 8000; mount models/ and set MODEL_PATH.
+# - train: Batch job; run with: docker compose run train
+# =============================================================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.serve
+    image: credit-risk-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # Fixed alias: serving always loads production.pkl (symlink to best model; set by training)
+      MODEL_PATH: /app/models/production.pkl
+    volumes:
+      # Mount local models dir (production.pkl symlink + artifacts; training updates the symlink)
+      - ./models:/app/models:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # One-off training job. Run: docker compose run train
+  # Writes to ./models and ./artifacts (mount them).
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    image: credit-risk-train:latest
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./artifacts:/app/artifacts
+    # Don't start with 'up'; use: docker compose run train
+    profiles:
+      - batch

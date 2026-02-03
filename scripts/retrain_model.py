@@ -10,6 +10,7 @@ This script orchestrates the complete retraining pipeline:
 """
 
 import logging
+import os
 import sys
 import uuid
 from datetime import datetime
@@ -148,7 +149,7 @@ def main():
         print(f"  Precision: {best_metrics.get('precision', 0):.4f}")
         print(f"  Recall: {best_metrics.get('recall', 0):.4f}")
 
-        # Promote best model to production
+        # Promote best model to production in registry
         if best_model_name in registered_models:
             version_id = registered_models[f"{best_model_name}_tuned"]
             registry.promote_model(
@@ -157,6 +158,25 @@ def main():
             print(f"  Promoted {best_model_name} to production")
         else:
             logger.warning(f"Best model {best_model_name} not found in registered models")
+
+        # Champion alias: point production.pkl (and metadata) at the best model so serving
+        # always loads the winner without hardcoding algorithm names. Symlinks work with
+        # volume-mounted ./models (e.g. Docker); no image rebuild when the champion changes.
+        best_pkl = models_dir / f"{best_model_name}_tuned.pkl"
+        best_metadata = models_dir / f"{best_model_name}_tuned_metadata.json"
+        production_pkl = models_dir / "production.pkl"
+        production_metadata = models_dir / "production_metadata.json"
+        if not best_pkl.exists() or not best_metadata.exists():
+            logger.warning("Best model artifact or metadata missing; skipping production symlink")
+        else:
+            for link_path, target_name in [
+                (production_pkl, best_pkl.name),
+                (production_metadata, best_metadata.name),
+            ]:
+                if link_path.exists():
+                    os.remove(link_path)
+                os.symlink(target_name, str(link_path))
+            print(f"  Champion alias: production.pkl -> {best_pkl.name}")
 
         # Update training run with results
         registry.update_training_run(

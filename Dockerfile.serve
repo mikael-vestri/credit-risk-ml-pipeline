@@ -1,0 +1,31 @@
+# =============================================================================
+# Serving image: FastAPI app only. No training logic.
+# Load model from registry/path (env MODEL_PATH or mounted volume).
+# Prometheus-compatible /metrics endpoint included.
+# =============================================================================
+# Build: docker build -f Dockerfile.serve -t credit-risk-api:latest .
+# Run:   docker run -p 8000:8000 -v /path/to/models:/app/models -e MODEL_PATH=/app/models/production.pkl credit-risk-api:latest
+# =============================================================================
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Add system deps here if any pip package needs them (e.g. build-essential)
+
+# Dependencies: use project requirements (API + inference libs)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Application code: only what serving needs (no scripts/, no training)
+COPY src/ ./src/
+COPY pyproject.toml .
+
+# Serve from src so that "api.app:app" resolves (api is under src)
+ENV PYTHONPATH=/app/src
+
+# Default: no model in image; must mount or set MODEL_PATH
+EXPOSE 8000
+
+# Production: no reload
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
