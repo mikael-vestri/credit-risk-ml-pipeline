@@ -1,65 +1,93 @@
 """
-Script to promote a model from staging to production (Step 13).
+Promote a model version to Production in MLflow Model Registry (Step 15).
 
 Usage:
-    python scripts/promote_model.py --model-name random_forest --version-id random_forest_20250126_120000
+    python scripts/promote_model.py --version 3
+    python scripts/promote_model.py --version 3 --model-name credit-risk-model
+    python scripts/promote_model.py --version 3 --archive-current
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
-# Add src to path
+# Add project root and src to path
 project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from registry.artifact_registry import ArtifactRegistry
+import mlflow
+from mlflow.tracking import MlflowClient
 
 
 def main():
-    """Promote a model to production."""
-    parser = argparse.ArgumentParser(description="Promote a model to production")
-    parser.add_argument(
-        "--model-name", required=True, help="Name of the model (e.g., 'random_forest')"
+    parser = argparse.ArgumentParser(
+        description="Promote a model version to Production in MLflow Model Registry"
     )
-    parser.add_argument("--version-id", required=True, help="Version ID of the model to promote")
     parser.add_argument(
-        "--stage",
-        default="production",
-        choices=["staging", "production", "archived"],
-        help="Target stage (default: production)",
+        "--version",
+        type=int,
+        required=True,
+        help="Model version number to promote (e.g. 3)",
     )
-
+    parser.add_argument(
+        "--model-name",
+        default="credit-risk-model",
+        help="Registered model name (default: credit-risk-model)",
+    )
+    parser.add_argument(
+        "--archive-current",
+        action="store_true",
+        help="Transition current Production version to Archived",
+    )
+    parser.add_argument(
+        "--tracking-uri",
+        default=None,
+        help="MLflow tracking URI (default: ./mlruns or MLFLOW_TRACKING_URI)",
+    )
     args = parser.parse_args()
 
-    # Initialize registry
-    registry_path = project_root / "artifacts" / "registry"
-    registry = ArtifactRegistry(registry_path)
+    tracking_uri = args.tracking_uri or os.environ.get("MLFLOW_TRACKING_URI") or str(project_root / "mlruns")
+    mlflow.set_tracking_uri(tracking_uri)
+    client = MlflowClient()
 
     print("=" * 80)
-    print("MODEL PROMOTION")
+    print("MODEL PROMOTION (MLflow)")
     print("=" * 80)
     print(f"Model: {args.model_name}")
-    print(f"Version: {args.version_id}")
-    print(f"Target stage: {args.stage}")
+    print(f"Version: {args.version}")
+    print(f"Target stage: Production")
     print("=" * 80)
 
     try:
-        registry.promote_model(
-            model_name=args.model_name, version_id=args.version_id, target_stage=args.stage
+        # Optionally archive current Production version
+        if args.archive_current:
+            try:
+                current = client.get_latest_versions(args.model_name, stages=["Production"])
+                for mv in current:
+                    client.transition_model_version_stage(
+                        name=args.model_name,
+                        version=mv.version,
+                        stage="Archived",
+                    )
+                    print(f"  Archived previous Production: v{mv.version}")
+            except Exception as e:
+                print(f"  (No current Production or error archiving: {e})")
+
+        # Transition the selected version to Production
+        client.transition_model_version_stage(
+            name=args.model_name,
+            version=str(args.version),
+            stage="Production",
         )
+        print(f"\n✅ Version {args.version} promoted to Production")
 
-        print(f"\n✅ Successfully promoted {args.version_id} to {args.stage}")
-
-        # Show current production model
-        prod_model = registry.get_production_model(args.model_name)
-        if prod_model:
-            print("\nCurrent production model:")
-            print(f"  Version: {prod_model['version_id']}")
-            print(f"  Registered: {prod_model['registered_at']}")
-            if "metrics" in prod_model:
-                print(f"  Metrics: {prod_model['metrics']}")
-
+        # Show current Production
+        prod = client.get_latest_versions(args.model_name, stages=["Production"])
+        if prod:
+            mv = prod[0]
+            print(f"\nCurrent Production: v{mv.version} (run_id: {mv.run_id})")
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)

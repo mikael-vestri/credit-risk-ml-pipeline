@@ -1,0 +1,30 @@
+# =============================================================================
+# Training image: retrain + evaluate + artifact logging. Batch job only.
+# Expects data/ (or DATA_PATH) and writes to artifacts/ and models/ (mount or env).
+# No serving; no long-running process. Run once and exit.
+# =============================================================================
+# Build: docker build -f Dockerfile.train -t credit-risk-train:latest .
+# Run:   docker run -v /path/to/data:/app/data -v /path/to/artifacts:/app/artifacts -v /path/to/models:/app/models credit-risk-train:latest
+# =============================================================================
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Add system deps here if any pip package needs them
+
+# Full dependencies (training, tuning, evaluation, registry)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Application and scripts (no data/models in image; mount at run time)
+COPY pyproject.toml .
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+
+# Repo root for scripts.* ; src for registry, config, data, models
+ENV PYTHONPATH=/app:/app/src
+
+# Default: run full retrain. Override for single steps, e.g.:
+#   docker run ... credit-risk-train:latest python scripts/clean_data.py
+CMD ["python", "scripts/retrain_model.py"]

@@ -2,9 +2,11 @@
 Model serving module.
 
 This module provides functions to load models and make predictions.
+Supports loading from path (MODEL_PATH) or from MLflow Model Registry (Production stage).
 """
 
 import logging
+import os
 import pickle
 from pathlib import Path
 from typing import Any
@@ -12,6 +14,41 @@ from typing import Any
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+
+def load_model_from_mlflow(
+    model_name: str = "credit-risk-model",
+    stage: str = "Production",
+    tracking_uri: str | None = None,
+) -> tuple[Any, dict[str, Any]]:
+    """
+    Load the production model from MLflow Model Registry.
+
+    Returns (model, metadata) where metadata has model_name, feature_count, feature_names
+    for compatibility with get_model_info and the API.
+    """
+    import mlflow
+    from mlflow import pyfunc
+
+    if tracking_uri:
+        mlflow.set_tracking_uri(tracking_uri)
+    uri = f"models:/{model_name}/{stage}"
+    logger.info(f"Loading model from MLflow: {uri}")
+    model = pyfunc.load_model(uri)
+    # Build metadata from MLflow signature if available
+    feature_names = []
+    if hasattr(model, "metadata") and model.metadata and hasattr(model.metadata, "signature"):
+        sig = model.metadata.signature
+        if sig and sig.inputs:
+            feature_names = [inp.name for inp in sig.inputs]
+    metadata = {
+        "model_name": model_name,
+        "feature_count": len(feature_names),
+        "feature_names": feature_names,
+        "timestamp": "mlflow",
+    }
+    logger.info(f"Model loaded from MLflow: {model_name} (features: {len(feature_names)})")
+    return model, metadata
 
 
 def load_model_from_disk(model_path: Path) -> Any:

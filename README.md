@@ -133,7 +133,7 @@ The primary metric will be determined based on business priorities. Candidates i
 
 ## Project Status
 
-**Current Phase**: Step 13 - Production Hardening ✅
+**Current Phase**: Step 14 - Dockerization ✅
 
 **Completed Steps**: 
 - Step 0: Project Definition & Alignment ✅
@@ -150,6 +150,7 @@ The primary metric will be determined based on business priorities. Candidates i
 - Step 11: Production Deployment (FastAPI REST API) ✅
 - Step 12: Communication & Portfolio Polish ✅
 - Step 13: Production Hardening (CI/CD, Monitoring, Versioning, Retraining) ✅
+- Step 14: Dockerization (separate serving and training images, no all-in-one) ✅
 
 ---
 
@@ -409,6 +410,12 @@ credit-risk-ml-pipeline/
 
 For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md).
 
+### Running with Docker (Step 14)
+
+- **Serving**: Build and run the API in a container; mount your `models/` and set `MODEL_PATH`. See [docs/DOCKER.md](docs/DOCKER.md).
+- **Training**: Build and run the retrain pipeline as a one-off job; mount `data/`, `models/`, and `artifacts/`.
+- **Compose**: `docker compose up api` to start the API; `docker compose run train` to run training once.
+
 ---
 
 ## Documentation
@@ -416,6 +423,7 @@ For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMEN
 ### Production Documentation
 - **[Production Checklist](docs/PRODUCTION_CHECKLIST.md)**: Pre-deployment checklist, deployment steps, and post-deployment validation
 - **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)**: Troubleshooting guide, monitoring procedures, and emergency protocols
+- **[Docker (Step 14)](docs/DOCKER.md)**: Build and run serving/training images; contracts and optional Compose
 
 ### API Documentation
 - **[API Documentation](docs/API_DOCUMENTATION.md)**: Complete API reference with endpoints, request/response formats, and examples

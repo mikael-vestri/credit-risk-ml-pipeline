@@ -1,0 +1,51 @@
+# Git and IDE
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.swp
+*~
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv
+env
+.venv
+.env
+.env.*
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.mypy_cache
+.ruff_cache
+
+# Data and artifacts (mounted at runtime, not baked into image)
+data/
+/models/
+*.pkl
+*.joblib
+artifacts/
+mlruns/
+
+# Docs and dev (not needed in container)
+docs/
+*.md
+!README.md
+tests/
+
+# Build and packaging
+build/
+dist/
+*.egg-info
+.eggs/
+*.egg
+
+# OS
+.DS_Store
+Thumbs.db
