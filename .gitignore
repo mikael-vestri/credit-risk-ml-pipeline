@@ -57,6 +57,9 @@ data/external/*
 *.h5
 *.pb
 
+# MLflow (local tracking)
+mlruns/
+
 # Logs
 *.log
 logs/

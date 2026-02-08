@@ -30,6 +30,9 @@ pydantic>=2.0.0
 # Monitoring
 prometheus-client>=0.20.0
 
+# MLflow (tracking + model registry)
+mlflow>=2.9.0
+
 # Optional: For notebooks (if needed)
 # jupyter>=1.0.0
 
