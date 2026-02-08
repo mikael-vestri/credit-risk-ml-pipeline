@@ -28,6 +28,7 @@ from api.monitoring import (
 from api.serving import (
     get_model_info,
     load_model_from_disk,
+    load_model_from_mlflow,
     load_model_metadata,
     predict_default_probability,
     prepare_input_features,
@@ -239,50 +240,51 @@ class HealthResponse(BaseModel):
 async def load_model():
     """Load the champion model on application startup.
 
-    Serving loads a fixed alias (e.g. production.pkl), not a model-specific file.
-    The training pipeline sets that alias to the best model (symlink); we do not
-    hardcode algorithm names here so that when XGBoost wins training, the API
-    automatically serves XGBoost without code or config changes.
-
-    Path resolution:
-    1. MODEL_PATH env var (e.g. /app/models/production.pkl in Docker)
-    2. MODEL_METADATA_PATH env var (optional; if unset, derived as <stem>_metadata.json)
-    3. Default: project_root/models/production.pkl (local development)
+    If MLFLOW_TRACKING_URI is set, load the Production model from MLflow Model Registry
+    (model name from MLFLOW_MODEL_NAME, default credit-risk-model). Otherwise load from
+    path: MODEL_PATH or default production.pkl alias (symlink set by training).
     """
     global MODEL, MODEL_METADATA, MODEL_INFO
 
+    mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI")
+    model_name_mlflow = os.environ.get("MLFLOW_MODEL_NAME", "credit-risk-model")
+
+    # Prefer MLflow Production when tracking URI is set
+    if mlflow_uri:
+        try:
+            MODEL, MODEL_METADATA = load_model_from_mlflow(
+                model_name=model_name_mlflow,
+                stage="Production",
+                tracking_uri=mlflow_uri,
+            )
+            MODEL_INFO = get_model_info(MODEL_METADATA)
+            logger.info(f"Model loaded from MLflow: {MODEL_INFO['model_name']}")
+            logger.info(f"Model expects {MODEL_INFO['feature_count']} features")
+            update_model_loaded_status(True)
+            return
+        except Exception as e:
+            logger.warning(f"MLflow load failed ({e}); falling back to MODEL_PATH")
+
+    # Path-based loading (MODEL_PATH or default production.pkl alias)
     try:
         env_model = os.environ.get("MODEL_PATH")
         env_metadata = os.environ.get("MODEL_METADATA_PATH")
-
         if env_model:
             model_path = Path(env_model)
-            if env_metadata:
-                metadata_path = Path(env_metadata)
-            else:
-                # Derive metadata path: production.pkl -> production_metadata.json (alias; symlink set by training)
-                stem = model_path.stem
-                metadata_path = model_path.parent / f"{stem}_metadata.json"
+            metadata_path = Path(env_metadata) if env_metadata else model_path.parent / f"{model_path.stem}_metadata.json"
         else:
-            # Default: fixed alias so serving never depends on a specific algorithm name
             models_dir = project_root / "models"
             model_path = models_dir / "production.pkl"
             metadata_path = models_dir / "production_metadata.json"
-
         if not model_path.exists():
             raise FileNotFoundError(f"Model file not found: {model_path}")
-
         logger.info(f"Loading model: {model_path}")
         MODEL = load_model_from_disk(model_path)
         MODEL_METADATA = load_model_metadata(metadata_path)
         MODEL_INFO = get_model_info(MODEL_METADATA)
-
         logger.info(f"Model loaded successfully: {MODEL_INFO['model_name']}")
         logger.info(f"Model expects {MODEL_INFO['feature_count']} features")
-
-        # Update monitoring
         update_model_loaded_status(True)
-
     except Exception as e:
         logger.error(f"Failed to load model: {str(e)}")
         update_model_loaded_status(False)
