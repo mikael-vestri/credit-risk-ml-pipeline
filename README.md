@@ -133,7 +133,7 @@ The primary metric will be determined based on business priorities. Candidates i
 
 ## Project Status
 
-**Current Phase**: Step 14 - Dockerization ✅
+**Current Phase**: Step 15 - MLflow Integration ✅
 
 **Completed Steps**: 
 - Step 0: Project Definition & Alignment ✅
@@ -151,6 +151,7 @@ The primary metric will be determined based on business priorities. Candidates i
 - Step 12: Communication & Portfolio Polish ✅
 - Step 13: Production Hardening (CI/CD, Monitoring, Versioning, Retraining) ✅
 - Step 14: Dockerization (separate serving and training images, no all-in-one) ✅
+- Step 15: MLflow Integration (tracking, model registry, promote, serving fallback) ✅
 
 ---
 
@@ -413,7 +414,7 @@ For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMEN
 ### Running with Docker (Step 14)
 
 - **Serving**: Build and run the API in a container; mount your `models/` and set `MODEL_PATH`. See [docs/DOCKER.md](docs/DOCKER.md).
-- **Training**: Build and run the retrain pipeline as a one-off job; mount `data/`, `models/`, and `artifacts/`.
+- **Training**: Build and run the retrain pipeline as a one-off job; mount `data/`, `models/`, and `artifacts/`. Retraining logs to MLflow (Step 15); see [docs/MLFLOW.md](docs/MLFLOW.md).
 - **Compose**: `docker compose up api` to start the API; `docker compose run train` to run training once.
 
 ---
@@ -424,6 +425,7 @@ For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMEN
 - **[Production Checklist](docs/PRODUCTION_CHECKLIST.md)**: Pre-deployment checklist, deployment steps, and post-deployment validation
 - **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)**: Troubleshooting guide, monitoring procedures, and emergency protocols
 - **[Docker (Step 14)](docs/DOCKER.md)**: Build and run serving/training images; contracts and optional Compose
+- **[MLflow (Step 15)](docs/MLFLOW.md)**: Where runs are stored, how to promote, and optional remote tracking
 
 ### API Documentation
 - **[API Documentation](docs/API_DOCUMENTATION.md)**: Complete API reference with endpoints, request/response formats, and examples
