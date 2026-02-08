@@ -227,28 +227,31 @@ print(f'Production models: {summary[\"production_models\"]}')
 "
 ```
 
-### Promote Model to Production
+### Promote Model to Production (MLflow)
+
+After retraining, new model versions are in Staging. Promote a version to Production:
 
 ```bash
-python scripts/promote_model.py \
-  --model-name random_forest \
-  --version-id random_forest_20250126_120000
+# Promote version 5 to Production; optionally archive current Production
+python scripts/promote_model.py --version 5 --archive-current
+
+# With custom model name or tracking URI
+python scripts/promote_model.py --version 5 --model-name credit-risk-model --tracking-uri http://mlflow:5000
 ```
+
+See [docs/MLFLOW.md](MLFLOW.md) for details.
 
 ### Rollback Model
 
-To rollback to a previous version:
+To rollback to a previous Production version:
 
 ```bash
-# 1. List available versions
-# (check registry.json or use registry API)
+# 1. List versions in MLflow UI or: mlflow models list --name credit-risk-model (if CLI available)
 
-# 2. Promote previous version
-python scripts/promote_model.py \
-  --model-name random_forest \
-  --version-id <previous_version_id>
+# 2. Promote the previous version to Production (current Production can be archived)
+python scripts/promote_model.py --version <previous_version> --archive-current
 
-# 3. Restart API server (if needed)
+# 3. Restart API server if serving from path (production.pkl); if serving from MLflow, it will use the new Production version
 ```
 
 ### Retrain Model
