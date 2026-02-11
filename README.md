@@ -133,7 +133,7 @@ The primary metric will be determined based on business priorities. Candidates i
 
 ## Project Status
 
-**Current Phase**: Step 15 - MLflow Integration ✅
+**Current Phase**: Step 16 - Rollback & Governance ✅
 
 **Completed Steps**: 
 - Step 0: Project Definition & Alignment ✅
@@ -152,6 +152,7 @@ The primary metric will be determined based on business priorities. Candidates i
 - Step 13: Production Hardening (CI/CD, Monitoring, Versioning, Retraining) ✅
 - Step 14: Dockerization (separate serving and training images, no all-in-one) ✅
 - Step 15: MLflow Integration (tracking, model registry, promote, serving fallback) ✅
+- Step 16: Rollback & Governance (explicit rollback script, runbook) ✅
 
 ---
 
@@ -426,6 +427,7 @@ For detailed API documentation, see [docs/API_DOCUMENTATION.md](docs/API_DOCUMEN
 - **[Operations Runbook](docs/OPERATIONS_RUNBOOK.md)**: Troubleshooting guide, monitoring procedures, and emergency protocols
 - **[Docker (Step 14)](docs/DOCKER.md)**: Build and run serving/training images; contracts and optional Compose
 - **[MLflow (Step 15)](docs/MLFLOW.md)**: Where runs are stored, how to promote, and optional remote tracking
+- **[Testing Steps 14–16](docs/TESTING_STEPS_14_16.md)**: How to test Docker, MLflow, promote, and rollback
 
 ### API Documentation
 - **[API Documentation](docs/API_DOCUMENTATION.md)**: Complete API reference with endpoints, request/response formats, and examples
