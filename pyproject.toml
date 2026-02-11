@@ -69,3 +69,8 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+
+[tool.pyright]
+# Scripts in repo root import via sys.path.insert(project_root / "src"); help the linter resolve "registry", etc.
+extraPaths = ["src"]
+

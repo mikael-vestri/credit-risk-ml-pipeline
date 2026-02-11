@@ -241,18 +241,28 @@ python scripts/promote_model.py --version 5 --model-name credit-risk-model --tra
 
 See [docs/MLFLOW.md](MLFLOW.md) for details.
 
-### Rollback Model
+### Rollback Model (Step 16)
 
-To rollback to a previous Production version:
+**When to rollback:** Production model is underperforming, has a bug, or you need to revert to a known-good version. Rollback is an explicit, auditable action (no automatic rollback).
+
+**How to rollback:** Use the dedicated rollback script. It restores a chosen version to Production and archives the current Production version.
 
 ```bash
-# 1. List versions in MLflow UI or: mlflow models list --name credit-risk-model (if CLI available)
+# Restore version 4 to Production (current Production is moved to Archived)
+python scripts/rollback_model.py --version 4
 
-# 2. Promote the previous version to Production (current Production can be archived)
-python scripts/promote_model.py --version <previous_version> --archive-current
+# Optional: keep current Production in Staging instead of Archived
+python scripts/rollback_model.py --version 4 --no-archive-current
 
-# 3. Restart API server if serving from path (production.pkl); if serving from MLflow, it will use the new Production version
+# Custom model name or tracking URI
+python scripts/rollback_model.py --version 4 --model-name credit-risk-model --tracking-uri http://mlflow:5000
 ```
+
+**How to verify after rollback:**
+
+1. **If serving from MLflow:** API loads `Production` stage; after rollback it will serve the restored version. Check `/health` or `/stats` (model info) and run a test prediction.
+2. **If serving from path (production.pkl):** The symlink still points to the artifact chosen at last retrain. To serve the rolled-back model from path, you must either run a retrain that selects that model again, or manually update the symlink to the correct artifact; otherwise restart the API after updating the symlink. Prefer serving from MLflow so Production stage and API stay in sync without touching the filesystem.
+3. **MLflow UI:** In the Model Registry, confirm the chosen version is in Production and the previous one is Archived.
 
 ### Retrain Model
 

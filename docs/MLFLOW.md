@@ -45,6 +45,18 @@ Promotion is **manual** by design: no auto-promote on metric threshold.
 
 ---
 
+## Rollback (Step 16)
+
+To revert Production to a **previous** version (e.g. after a bad deploy), use the rollback script. It transitions the chosen version to Production and archives the current one.
+
+```bash
+python scripts/rollback_model.py --version 4
+```
+
+See [Operations Runbook](OPERATIONS_RUNBOOK.md#rollback-model-step-16) for when to rollback and how to verify.
+
+---
+
 ## Serving from MLflow vs path
 
 - **Path-based (default):** API loads from `MODEL_PATH` (e.g. `production.pkl`). The retrain script updates the `production.pkl` symlink to the best model, so no MLflow is needed for serving.
